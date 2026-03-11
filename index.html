@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Planejador de Estudos com IA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f8ff;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background: #2980b9; }
+        #resultado {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-line;
+        }
+        #loading { text-align: center; color: #3498db; font-size: 18px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Planejador de Estudos com IA</h1>
+        
+        <form id="formEstudo">
+            <div class="form-group">
+                <label>Qual prova?</label>
+                <input type="text" id="prova" placeholder="Ex: Cálculo 1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Matérias</label>
+                <textarea id="materias" rows="3" placeholder="Ex: Limites, Derivadas, Integrais" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Dias disponíveis</label>
+                <input type="number" id="dias" min="1" max="30" value="7" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Horas por dia</label>
+                <input type="number" id="horas" min="1" max="12" value="2" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Seu nível</label>
+                <select id="nivel">
+                    <option value="Iniciante">Iniciante</option>
+                    <option value="Básico" selected>Básico</option>
+                    <option value="Intermediário">Intermediário</option>
+                </select>
+            </div>
+            
+            <button type="submit">Gerar Plano de Estudos</button>
+        </form>
+        
+        <div id="loading">⏳ Gerando seu plano...</div>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        document.getElementById('formEstudo').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultado').innerHTML = '';
+            
+            const dados = {
+                prova: document.getElementById('prova').value,
+                materias: document.getElementById('materias').value,
+                dias: document.getElementById('dias').value,
+                horas: document.getElementById('horas').value,
+                nivel: document.getElementById('nivel').value
+            };
+            
+            try {
+                    const resposta = await fetch('http://127.0.0.1:5000/gerar-plano', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+                
+                const resultado = await resposta.json();
+                
+                if (resultado.sucesso) {
+                    document.getElementById('resultado').innerHTML = resultado.plano.replace(/\n/g, '<br>');
+                } else {
+                    document.getElementById('resultado').innerHTML = 'Erro: ' + resultado.erro;
+                }
+            } catch (erro) {
+                document.getElementById('resultado').innerHTML = 'Erro de conexão: ' + erro.message;
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
